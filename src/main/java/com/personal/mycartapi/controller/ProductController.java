@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -42,7 +43,8 @@ public class ProductController {
     }
 
     @PostMapping("/products")
-    public ResponseEntity<?> addProduct(@RequestPart Product product, @RequestPart MultipartFile imageFile) {
+    public ResponseEntity<?> addProduct(@RequestPart Product product,
+                                        @RequestPart MultipartFile imageFile) {
         try {
             Product product1 = productService.addProduct(product, imageFile);
             return new ResponseEntity<>(product1, HttpStatus.CREATED);
@@ -67,5 +69,33 @@ public class ProductController {
         return ResponseEntity.ok()
                 .contentType(MediaType.valueOf(product.getImageType()))
                 .body(imageFile);
+    }
+
+    @PutMapping("/products/{id}")
+    public ResponseEntity<String> updateProductById(@PathVariable int id,
+                                                    @RequestPart Product product,
+                                                    @RequestPart MultipartFile imageFile) {
+        Product product1 = null;
+        try {
+            product1 = productService.updateProductById(id, product, imageFile);
+        } catch (IOException e) {
+            return new ResponseEntity<>("Failed to Update", HttpStatus.BAD_REQUEST);
+        }
+        if (product1 == null) {
+              return new ResponseEntity<>("Failed to Update", HttpStatus.BAD_REQUEST);
+        }
+
+        return new ResponseEntity<>("Product updated successfully", HttpStatus.OK);
+    }
+
+    @DeleteMapping("/products/{id}")
+    public ResponseEntity<String> deleteProductById(@PathVariable int id) {
+        Product product = productService.getProductById(id);
+        if (product == null) {
+            return new ResponseEntity<>("Failed to Delete", HttpStatus.NOT_FOUND);
+        }
+
+        productService.deleteProductById(id);
+        return new ResponseEntity<>("Product deleted successfully", HttpStatus.OK);
     }
 }

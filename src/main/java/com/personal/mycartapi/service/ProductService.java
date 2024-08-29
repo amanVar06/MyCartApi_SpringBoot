@@ -32,4 +32,22 @@ public class ProductService {
 
         return productRepo.save(product);
     }
+
+    public Product updateProductById(int id, Product product, MultipartFile imageFile) throws IOException {
+        if (imageFile != null && !imageFile.isEmpty()) {
+            product.setImageName(imageFile.getOriginalFilename());
+            product.setImageType(imageFile.getContentType());
+            product.setImageData(imageFile.getBytes());
+        }
+
+        if (productRepo.existsById(id)) {
+            return productRepo.save(product);
+        }
+
+        return null;
+    }
+
+    public void deleteProductById(int id) {
+        productRepo.deleteById(id);
+    }
 }
